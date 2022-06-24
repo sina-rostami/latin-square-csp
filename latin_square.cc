@@ -12,7 +12,7 @@ struct LatinSquare
   std::size_t size;
   LatinSquareType latin_square;
 
-  LatinSquare(std::size_t i_size) : size(i_size)
+  LatinSquare(const std::size_t i_size) : size(i_size)
   {
     for (std::size_t i = 0; i < size * size; i++)
       latin_square.push_back(0);
