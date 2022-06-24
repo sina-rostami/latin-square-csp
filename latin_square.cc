@@ -18,39 +18,54 @@ struct LatinSquare
       latin_square.push_back(0);
   }
 
-  void print() const
+  friend std::ostream &operator<<(std::ostream &os, const LatinSquare &square)
   {
-    for (std::size_t i = 0; i < size * size; i += size)
+    for (std::size_t i = 0; i < square.latin_square.size(); i += square.size)
     {
-      std::cout << "| ";
-      for (std::size_t j = i; j < i + size; j++)
-        std::cout << latin_square[j] << " ";
-      std::cout << "|\n";
+      os << "| ";
+      for (std::size_t j = i; j < i + square.size; j++)
+        os << square.latin_square[j] << " ";
+      os << "|\n";
     }
+
+    return os;
   }
 };
 
 struct LatinSquareBuilder
 {
   std::size_t size;
-  PossibleValues base_possible_values;
 
-  LatinSquareBuilder(const int n) : size(n)
+  LatinSquareBuilder(const int n) : size(n) {}
+
+  std::vector<int> get_base_possible_value()
   {
-    std::vector<int> base;
+    std::vector<int> base_possible_value;
+
     for (int i = 0; i < size; i++)
-      base.push_back(i + 1);
+      base_possible_value.push_back(i + 1);
+
+    return base_possible_value;
+  }
+
+  PossibleValues get_square_possible_values_base()
+  {
+    PossibleValues square_possible_values;
+
+    auto base_possible_value = get_base_possible_value();
 
     for (std::size_t i = 0; i < size; i++)
       for (std::size_t j = 0; j < size; j++)
-        base_possible_values[i * size + j] = base;
+        square_possible_values[i * size + j] = base_possible_value;
+
+    return square_possible_values;
   }
 
   std::optional<LatinSquare>
-  build_latin_square_impl(std::size_t index, PossibleValues possible_values,
+  build_latin_square_logic(std::size_t index, PossibleValues possible_values,
                           LatinSquare latin_square)
   {
-    if (index == size * size)
+    if (index == latin_square.latin_square.size())
       return latin_square;
 
     if (!possible_values[index].size())
@@ -80,7 +95,7 @@ struct LatinSquareBuilder
       for (std::size_t i = col_number; i < size * size; i += size)
         remove_value_from_possible_values(i);
 
-      if (auto result = build_latin_square_impl(index + 1, temp_possible_values,
+      if (auto result = build_latin_square_logic(index + 1, temp_possible_values,
                                                 temp_latin_square))
         return result;
     }
@@ -90,9 +105,10 @@ struct LatinSquareBuilder
 
   LatinSquare build_latin_square()
   {
-    auto possible_values = base_possible_values;
-    LatinSquare latin_square(size);
-    return *build_latin_square_impl(0, possible_values, latin_square);
+    auto possible_values = get_square_possible_values_base();
+    LatinSquare latin_square{size};
+
+    return *build_latin_square_logic(0, possible_values, latin_square);
   }
 };
 
@@ -106,8 +122,7 @@ int main()
 
   const auto result = latin_square.build_latin_square();
 
-  std::cout << "Latin Square with size " << n << " : \n";
-  result.print();
+  std::cout << "Latin Square with size " << n << " : \n" << result;
 
   return 0;
 }
