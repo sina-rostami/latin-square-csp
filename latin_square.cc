@@ -38,7 +38,7 @@ struct LatinSquareBuilder
 
   LatinSquareBuilder(const int n) : size(n) {}
 
-  std::vector<int> get_base_possible_value()
+  const std::vector<int> get_base_possible_value() const
   {
     std::vector<int> base_possible_value;
 
@@ -48,7 +48,7 @@ struct LatinSquareBuilder
     return base_possible_value;
   }
 
-  PossibleValues get_square_possible_values_base()
+  const PossibleValues get_square_possible_values_base() const
   {
     PossibleValues square_possible_values;
 
@@ -61,17 +61,18 @@ struct LatinSquareBuilder
     return square_possible_values;
   }
 
-  std::optional<LatinSquare>
-  build_latin_square_logic(std::size_t index, PossibleValues possible_values,
-                          LatinSquare latin_square)
+  const std::optional<LatinSquare>
+  build_latin_square_logic(const std::size_t index,
+                           const PossibleValues possible_values,
+                           const LatinSquare latin_square) const
   {
     if (index == latin_square.latin_square.size())
       return latin_square;
 
-    if (!possible_values[index].size())
+    if (!possible_values.at(index).size())
       return std::nullopt;
 
-    for (const auto value : possible_values[index])
+    for (const auto value : possible_values.at(index))
     {
       const auto row_number = index / size;
       const auto col_number = index % size;
@@ -95,18 +96,18 @@ struct LatinSquareBuilder
       for (std::size_t i = col_number; i < size * size; i += size)
         remove_value_from_possible_values(i);
 
-      if (auto result = build_latin_square_logic(index + 1, temp_possible_values,
-                                                temp_latin_square))
+      if (const auto result = build_latin_square_logic(
+              index + 1, temp_possible_values, temp_latin_square))
         return result;
     }
 
     return std::nullopt;
   }
 
-  LatinSquare build_latin_square()
+  const LatinSquare build_latin_square() const
   {
-    auto possible_values = get_square_possible_values_base();
-    LatinSquare latin_square{size};
+    const auto possible_values = get_square_possible_values_base();
+    const LatinSquare latin_square{size};
 
     return *build_latin_square_logic(0, possible_values, latin_square);
   }
